@@ -16,6 +16,16 @@ const AdminDashboard = () => {
     const { user } = useSelector(state => state.auth);
     const { resources, isLoading, isError, message } = useSelector(state => state.resource);
 
+    // Final navigation handler for the static Add button
+    const navigateToAddResource = () => {
+        navigate('/admin/add');
+    };
+    
+    // Final navigation handler for the dynamic Edit button
+    const navigateToEditResource = (resourceId) => {
+        navigate(`/admin/edit/${resourceId}`);
+    };
+    
     useEffect(() => {
         if (!user) {
             navigate('/login');
@@ -49,10 +59,9 @@ const AdminDashboard = () => {
                     <Col className="text-center">
                         <Alert variant="info">
                             No resources found in the database. <br /> 
-                            {/* FINAL FIX ATTEMPT 1: Direct Button onClick */}
                             <Button 
                                 variant="link" 
-                                onClick={() => navigate('/admin/add')} // Direct navigate call
+                                onClick={navigateToAddResource} 
                                 style={{ padding: '0', verticalAlign: 'baseline' }}
                             >
                                 Click here to add the first resource.
@@ -71,11 +80,11 @@ const AdminDashboard = () => {
                     <h1>Resource Management Dashboard</h1>
                 </Col>
                 <Col className="text-end">
-                    {/* FINAL FIX ATTEMPT 2: Direct Button onClick for main button */}
+                    {/* CRITICAL FIX: The main Add Button uses the final onClick handler */}
                     <Button 
                         variant="success" 
                         className="d-flex align-items-center ms-auto" 
-                        onClick={() => navigate('/admin/add')} // Direct navigate call
+                        onClick={navigateToAddResource}
                     >
                         <FaPlus className="me-2" /> Add New Resource
                     </Button>
@@ -102,12 +111,14 @@ const AdminDashboard = () => {
                             <td>{resource.provider}</td>
                             <td>{new Date(resource.createdAt).toLocaleDateString()}</td>
                             <td>
-                                {/* Edit Button */}
-                                <LinkContainer to={`/admin/edit/${resource._id}`}>
-                                    <Button variant="info" className="btn-sm me-2">
-                                        <FaEdit />
-                                    </Button>
-                                </LinkContainer>
+                                {/* CRITICAL FIX: Edit Button uses direct onClick handler */}
+                                <Button 
+                                    variant="info" 
+                                    className="btn-sm me-2"
+                                    onClick={() => navigateToEditResource(resource._id)}
+                                >
+                                    <FaEdit />
+                                </Button>
                                 
                                 {/* Delete Button */}
                                 <Button 

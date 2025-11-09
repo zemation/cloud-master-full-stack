@@ -4,9 +4,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 import { API_ROOT_URL } from '../../config/config.js'; 
-
 const RESOURCE_API_URL = `${API_ROOT_URL}resources`; 
-const API_TIMEOUT = 10000; // ⬅️ DEFINITIVE FIX: 10 seconds timeout ⬅️
+const API_TIMEOUT = 10000; // 10 seconds timeout
 
 const initialState = {
   resources: [],
@@ -42,7 +41,6 @@ export const getResources = createAsyncThunk(
         try {
             const { token, ...filterParams } = query || {}; 
 
-            // Pass the token config or a generic config with the timeout
             const fetchConfig = token ? config(token) : { timeout: API_TIMEOUT };
 
             const queryString = new URLSearchParams(filterParams).toString();
@@ -73,7 +71,7 @@ export const deleteResource = createAsyncThunk(
     'resource/delete',
     async ({ id, token }, thunkAPI) => {
         try {
-            const response = await axios.delete(`${RESOURCE_API_URL}/${id}`, config(token));
+            const response = await axios.delete(`${RESOURCE_API_URL}/${id}`, config(token)); 
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(extractErrorMessage(error));
@@ -84,9 +82,12 @@ export const deleteResource = createAsyncThunk(
 // @desc    GET /api/resources/:id (Required for EditResourcePage)
 export const getResourceById = createAsyncThunk(
     'resource/getOne',
-    async (id, thunkAPI) => {
+    async ({ id, token }, thunkAPI) => {
         try {
-            const response = await axios.get(`${RESOURCE_API_URL}/${id}`, { timeout: API_TIMEOUT }); // Using generic timeout config
+            // Create config with token, ensuring the request is authenticated 
+            const fetchConfig = token ? config(token) : { timeout: API_TIMEOUT }; 
+
+            const response = await axios.get(`${RESOURCE_API_URL}/${id}`, fetchConfig);
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(extractErrorMessage(error));
@@ -132,16 +133,17 @@ export const resourceSlice = createSlice({
             .addCase(getResources.pending, (state) => { state.isLoading = true; })
             .addCase(getResources.fulfilled, (state, action) => {
                 state.isLoading = false; 
-                state.isSuccess = true; 
                 state.resources = action.payload; 
             })
             .addCase(getResources.rejected, (state, action) => {
                 state.isLoading = false; state.isError = true; state.message = action.payload;
             })
             // --- GET BY ID ---
-            .addCase(getResourceById.pending, (state) => { state.isLoading = true; })
+            .addCase(getResourceById.pending, (state) => { state.isLoading = true; state.selectedResource = null; }) 
             .addCase(getResourceById.fulfilled, (state, action) => {
-                state.isLoading = false; state.isSuccess = true; state.selectedResource = action.payload;
+                state.isLoading = false; 
+                state.isSuccess = true; 
+                state.selectedResource = action.payload; 
             })
             .addCase(getResourceById.rejected, (state, action) => {
                 state.isLoading = false; state.isError = true; state.message = action.payload; state.selectedResource = null;
@@ -150,6 +152,7 @@ export const resourceSlice = createSlice({
             .addCase(updateResource.fulfilled, (state, action) => {
                 state.isLoading = false; state.isSuccess = true; 
                 state.resources = state.resources.map(r => r._id === action.payload._id ? action.payload : r);
+                state.selectedResource = action.payload; 
             })
             .addCase(updateResource.rejected, (state, action) => {
                 state.isLoading = false; state.isError = true; state.message = action.payload;

@@ -2,39 +2,38 @@
 
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middleware/authMiddleware'); // For protected routes
 
-// --- Core Dependencies ---
+// Import the controller functions 
 const {
   getResources,
   createResource,
   updateResource,
   deleteResource,
-  getAllCertifications
-} = require('../controllers/resourceController');
+  getAllCertifications,
+} = require('../controllers/resourceController'); 
 
-// --- Security Middleware ---
-// Import the middleware to require a valid JWT for resource modification
-const { protect } = require('../middleware/authMiddleware');
+// --- MongoDB ID Pattern ---
+const mongoIdPattern = '[0-9a-fA-F]{24}';
 
 
-// --- 1. /api/resources Routes ---
-// GET is public (anyone can view resources).
-// POST is protected (only authenticated admins can create resources).
+// --- 1. Collection Routes (/api/resources) ---
 router.route('/')
-  .get(getResources)   // Handles: GET /api/resources?category=X&topic=Y (PUBLIC)
-  .post(protect, createResource); // Handles: POST /api/resources (PROTECTED)
+  .get(getResources)   // PUBLIC (Get all/filtered)
+  .post(protect, createResource); // PROTECTED (Add new resource)
 
 
-// Resource modification/deletion requires authentication.
-router.route('/:id')
-  .put(protect, updateResource)  // Handles: PUT /api/resources/:id (PROTECTED)
-  .delete(protect, deleteResource); // Handles: DELETE /api/resources/:id (PROTECTED)
+// --- 2. Dynamic ID Routes (/api/resources/:id) ---
+// CRITICAL FIX: The GET route MUST be explicitly defined here to resolve the 404.
+router.route(`/:id(${mongoIdPattern})`)
+  .get(getResources)   // PUBLIC (Get single resource by ID)
+  .put(protect, updateResource)   // PROTECTED (Update resource)
+  .delete(protect, deleteResource); // PROTECTED (Delete resource)
 
 
-// --- 2. /api/certifications Route ---
-// This endpoint is public for the frontend to build the dropdown list.
+// --- 3. Custom Routes ---
 router.route('/certifications') 
-  .get(getAllCertifications); // Handles: GET /api/certifications (PUBLIC)
+  .get(getAllCertifications); 
 
 
 module.exports = router;
