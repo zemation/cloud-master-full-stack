@@ -6,6 +6,7 @@ pipeline {
         DEPLOY_HOST = 'server.zemation.com'
         DEPLOY_PATH = '/home/cloud-master-api/htdocs/api.cloud-master.io'
         APP_NAME    = 'cloud-api'
+        NVM_DIR     = '/home/cloud-master-api/.nvm'
     }
 
     stages {
@@ -24,15 +25,16 @@ pipeline {
                             --exclude='node_modules' \
                             . ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
                     '''
-                    sh '''
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} << 'ENDSSH'
-                            source ~/.bashrc
-                            cd /home/cloud-master-api/htdocs/api.cloud-master.io
-                            npm ci --omit=dev
-                            pm2 restart cloud-api || pm2 start server.js --name cloud-api
+                    sh """
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} '
+                            export NVM_DIR=${NVM_DIR} &&
+                            . \$NVM_DIR/nvm.sh &&
+                            cd ${DEPLOY_PATH} &&
+                            npm ci --omit=dev &&
+                            pm2 restart ${APP_NAME} || pm2 start server.js --name ${APP_NAME} &&
                             pm2 save
-ENDSSH
-                    '''
+                        '
+                    """
                 }
             }
         }
