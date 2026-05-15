@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    environment {
+        DEPLOY_USER = 'cloud-master'
+        DEPLOY_HOST = 'server.zemation.com'
+        DEPLOY_PATH = '/home/cloud-master/htdocs/cloud-master.io'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('cloud-master-io') {
+                    sh 'npm ci'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('cloud-master-io') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                dir('cloud-master-io') {
+                    sh '''
+                        rsync -av --delete \
+                            --exclude='.env' \
+                            dist/ ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Frontend deployed successfully!'
+        }
+        failure {
+            echo 'Frontend deployment failed!'
+        }
+    }
+}

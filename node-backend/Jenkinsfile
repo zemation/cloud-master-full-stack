@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    environment {
+        DEPLOY_USER = 'cloud-master-api'
+        DEPLOY_HOST = 'server.zemation.com'
+        DEPLOY_PATH = '/home/cloud-master-api/htdocs'
+        APP_NAME    = 'cloud-api'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('node-backend') {
+                    sh 'npm ci'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                dir('node-backend') {
+                    sh '''
+                        rsync -av --delete \
+                            --exclude='.env' \
+                            --exclude='node_modules' \
+                            . ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+                    '''
+                    sh '''
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                            cd ${DEPLOY_PATH} &&
+                            npm ci --omit=dev &&
+                            pm2 restart ${APP_NAME} || pm2 start server.js --name ${APP_NAME} &&
+                            pm2 save
+                        "
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Backend deployed successfully!'
+        }
+        failure {
+            echo 'Backend deployment failed!'
+        }
+    }
+}
