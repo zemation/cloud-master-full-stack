@@ -4,7 +4,7 @@ pipeline {
     environment {
         DEPLOY_USER = 'cloud-master'
         DEPLOY_HOST = 'server.zemation.com'
-        DEPLOY_PATH = '/home/cloud-master/htdocs/cloud-master.io'
+        DEPLOY_PATH = '/home/cloud-master/htdocs/www.cloud-master'
     }
 
     stages {

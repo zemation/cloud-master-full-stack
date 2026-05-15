@@ -4,7 +4,7 @@ pipeline {
     environment {
         DEPLOY_USER = 'cloud-master-api'
         DEPLOY_HOST = 'server.zemation.com'
-        DEPLOY_PATH = '/home/cloud-master-api/htdocs'
+        DEPLOY_PATH = '/home/cloud-master-api/htdocs/api.cloud-master.io'
         APP_NAME    = 'cloud-api'
     }
 
@@ -27,7 +27,7 @@ pipeline {
             steps {
                 dir('node-backend') {
                     sh '''
-                        rsync -av --delete \
+                        rsync -av \
                             --exclude='.env' \
                             --exclude='node_modules' \
                             . ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
