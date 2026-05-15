@@ -3,30 +3,27 @@
 const express = require('express');
 const router = express.Router();
 
-// Import the user controller functions 
 const {
   registerUser,
   loginUser,
   getMe,
-} = require('../controllers/userController'); 
+  logoutUser,
+  forgotPassword,
+  resetPassword,
+  updatePassword
+} = require('../controllers/userController');
 
-// Import the protection middleware 
 const { protect } = require('../middleware/authMiddleware');
 
-
-// --- Public Endpoints ---
-
-// POST /api/users/register
+// Public
 router.post('/register', registerUser);
-
-// POST /api/users/login
 router.post('/login', loginUser);
+router.post('/forgotpassword', forgotPassword);
+router.put('/resetpassword/:resettoken', resetPassword);
 
-
-// --- Protected Endpoint Example ---
-
-// GET /api/users/me
+// Protected
+router.get('/logout', protect, logoutUser);
 router.get('/me', protect, getMe);
-
+router.put('/updatepassword', protect, updatePassword);
 
 module.exports = router;

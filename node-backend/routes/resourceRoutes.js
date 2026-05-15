@@ -2,38 +2,39 @@
 
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware'); // For protected routes
+const { protect, authorize } = require('../middleware/authMiddleware');
 
-// Import the controller functions 
 const {
   getResources,
+  getResource,
   createResource,
   updateResource,
   deleteResource,
   getAllCertifications,
-} = require('../controllers/resourceController'); 
+  getResourcesByCategory,
+  getResourcesByTopic,
+  incrementViews
+} = require('../controllers/resourceController');
 
-// --- MongoDB ID Pattern ---
-const mongoIdPattern = '[0-9a-fA-F]{24}';
+// IMPORTANT: Static/specific routes must come before dynamic /:id routes
 
+// --- Static routes ---
+router.get('/certifications', getAllCertifications);
+router.get('/category/:category', getResourcesByCategory);
+router.get('/topic/:topic', getResourcesByTopic);
 
-// --- 1. Collection Routes (/api/resources) ---
+// --- Collection routes ---
 router.route('/')
-  .get(getResources)   // PUBLIC (Get all/filtered)
-  .post(protect, createResource); // PROTECTED (Add new resource)
+  .get(getResources)
+  .post(protect, authorize('admin'), createResource);
 
+// --- Single resource routes ---
+router.route('/:id([0-9a-fA-F]{24})')
+  .get(getResource)
+  .put(protect, authorize('admin'), updateResource)
+  .delete(protect, authorize('admin'), deleteResource);
 
-// --- 2. Dynamic ID Routes (/api/resources/:id) ---
-// CRITICAL FIX: The GET route MUST be explicitly defined here to resolve the 404.
-router.route(`/:id(${mongoIdPattern})`)
-  .get(getResources)   // PUBLIC (Get single resource by ID)
-  .put(protect, updateResource)   // PROTECTED (Update resource)
-  .delete(protect, deleteResource); // PROTECTED (Delete resource)
-
-
-// --- 3. Custom Routes ---
-router.route('/certifications') 
-  .get(getAllCertifications); 
-
+// --- View tracking ---
+router.put('/:id([0-9a-fA-F]{24})/views', incrementViews);
 
 module.exports = router;
