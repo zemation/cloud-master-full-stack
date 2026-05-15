@@ -6,21 +6,12 @@ pipeline {
         DEPLOY_HOST = 'server.zemation.com'
         DEPLOY_PATH = '/home/cloud-master-api/htdocs/api.cloud-master.io'
         APP_NAME    = 'cloud-api'
-        NVM_BIN     = '/home/cloud-master-api/.nvm/versions/node/v22.22.3/bin'
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                dir('node-backend') {
-                    sh 'npm ci'
-                }
             }
         }
 
@@ -34,11 +25,11 @@ pipeline {
                             . ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
                     '''
                     sh '''
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} bash -lc "
                             cd ${DEPLOY_PATH} &&
-                            ${NVM_BIN}/npm ci --omit=dev &&
-                            ${NVM_BIN}/pm2 restart ${APP_NAME} || ${NVM_BIN}/pm2 start server.js --name ${APP_NAME} &&
-                            ${NVM_BIN}/pm2 save
+                            npm ci --omit=dev &&
+                            pm2 restart ${APP_NAME} || pm2 start server.js --name ${APP_NAME} &&
+                            pm2 save
                         "
                     '''
                 }
