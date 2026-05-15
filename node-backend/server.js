@@ -1,5 +1,4 @@
 // server.js
-// test
 
 const express = require('express');
 const mongoose = require('mongoose');
