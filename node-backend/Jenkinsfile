@@ -25,12 +25,13 @@ pipeline {
                             . ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
                     '''
                     sh '''
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} bash -lc "
-                            cd ${DEPLOY_PATH} &&
-                            npm ci --omit=dev &&
-                            pm2 restart ${APP_NAME} || pm2 start server.js --name ${APP_NAME} &&
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} << 'ENDSSH'
+                            source ~/.bashrc
+                            cd /home/cloud-master-api/htdocs/api.cloud-master.io
+                            npm ci --omit=dev
+                            pm2 restart cloud-api || pm2 start server.js --name cloud-api
                             pm2 save
-                        "
+ENDSSH
                     '''
                 }
             }
