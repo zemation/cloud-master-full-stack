@@ -12,6 +12,9 @@ const resourceRoutes = require('./routes/resourceRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
+
+app.set('trust proxy', 1); // trust Nginx proxy
+
 const PORT = process.env.PORT || 5500;
 const MONGO_URI = process.env.MONGO_URI;
 
