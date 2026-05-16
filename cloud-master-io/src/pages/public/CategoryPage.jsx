@@ -32,6 +32,7 @@ const topicIcons = {
   'Java': '☕',
   'Relational': '📊',
   'Non-Relational': '📁',
+  'Certifications': '🎓',
 };
 
 const CategoryPage = () => {
@@ -59,11 +60,12 @@ const CategoryPage = () => {
       </div>
 
       {/* Topics grid */}
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+      <div className='flex flex-wrap justify-center gap-4'>
         {topics.map((topic) => (
           <Link
             key={topic}
             to={`/category/${encodeURIComponent(decodedCategory)}/${encodeURIComponent(topic)}`}
+            className='w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]'
           >
             <Card className='h-full hover:border-blue-500 transition-colors'>
               <div className='text-3xl mb-3'>{topicIcons[topic] || '📚'}</div>
