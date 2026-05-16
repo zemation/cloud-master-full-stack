@@ -19,6 +19,12 @@ const resourceTypeBadgeVariant = {
   tool: 'red',
 };
 
+const difficultyBadgeVariant = {
+  beginner: 'green',
+  intermediate: 'yellow',
+  advanced: 'red',
+};
+
 const DashboardPage = () => {
   const dispatch = useDispatch();
   const { resources, isLoading, isError, message, total } = useSelector((state) => state.resources);
@@ -75,12 +81,13 @@ const DashboardPage = () => {
 
       <Card className='p-0 overflow-hidden'>
         <div className='overflow-x-auto'>
-          <table className='w-full min-w-[600px]'>
+          <table className='w-full min-w-[700px]'>
             <thead>
               <tr className='border-b border-gray-800'>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Title</th>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Category / Topic</th>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Type</th>
+                <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Difficulty</th>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Status</th>
                 <th className='text-right text-gray-400 text-sm font-medium px-6 py-4'>Actions</th>
               </tr>
@@ -88,7 +95,7 @@ const DashboardPage = () => {
             <tbody className='divide-y divide-gray-800'>
               {resources.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className='text-center text-gray-400 py-12'>
+                  <td colSpan={6} className='text-center text-gray-400 py-12'>
                     No resources yet.{' '}
                     <Link to='/admin/resources/add' className='text-blue-400 hover:underline'>
                       Add your first one.
@@ -117,6 +124,13 @@ const DashboardPage = () => {
                       {resource.resourceType && (
                         <Badge variant={resourceTypeBadgeVariant[resource.resourceType] || 'gray'}>
                           {resource.resourceType}
+                        </Badge>
+                      )}
+                    </td>
+                    <td className='px-6 py-4'>
+                      {resource.difficulty && (
+                        <Badge variant={difficultyBadgeVariant[resource.difficulty] || 'gray'}>
+                          {resource.difficulty}
                         </Badge>
                       )}
                     </td>
