@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getResource, updateResource, reset, clearResource } from '../../store/resourceSlice';
 import ResourceForm from '../../components/admin/ResourceForm';
 import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
 
 const EditResourcePage = () => {
@@ -44,9 +45,12 @@ const EditResourcePage = () => {
         <span className='text-white'>Edit Resource</span>
       </nav>
 
-      <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-white mb-2'>Edit Resource</h1>
-        <p className='text-gray-400'>Update an existing training resource.</p>
+      <div className='flex items-center justify-between mb-8'>
+        <div>
+          <h1 className='text-3xl font-bold text-white mb-2'>Edit Resource</h1>
+          <p className='text-gray-400'>Update an existing training resource.</p>
+        </div>
+        <Button variant='secondary' onClick={() => navigate('/admin')}>Cancel</Button>
       </div>
 
       {isError && (
