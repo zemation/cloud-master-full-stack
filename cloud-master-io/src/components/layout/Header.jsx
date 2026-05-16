@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { navigationMap } from '../../config/config';
 
+import logo from '../assets/logo.png';
+
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -21,6 +23,7 @@ const Header = () => {
         {/* Top bar */}
         <div className='flex items-center justify-between h-16'>
           <Link to='/' className='text-xl font-bold text-blue-400 hover:text-blue-300 transition-colors'>
+            <img src={logo} alt='Cloud Master' className='h-8 w-auto' />
             Cloud Master
           </Link>
 
