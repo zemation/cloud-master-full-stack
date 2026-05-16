@@ -1,1 +1,1 @@
-backend api for cloud-master
+BackendAPI for the Cloud-master website
