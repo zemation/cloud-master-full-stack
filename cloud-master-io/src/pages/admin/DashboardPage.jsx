@@ -75,21 +75,20 @@ const DashboardPage = () => {
 
       <Card className='p-0 overflow-hidden'>
         <div className='overflow-x-auto'>
-          <table className='w-full'>
+          <table className='w-full min-w-[600px]'>
             <thead>
               <tr className='border-b border-gray-800'>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Title</th>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Category / Topic</th>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Type</th>
                 <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Status</th>
-                <th className='text-left text-gray-400 text-sm font-medium px-6 py-4'>Views</th>
                 <th className='text-right text-gray-400 text-sm font-medium px-6 py-4'>Actions</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-800'>
               {resources.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className='text-center text-gray-400 py-12'>
+                  <td colSpan={5} className='text-center text-gray-400 py-12'>
                     No resources yet.{' '}
                     <Link to='/admin/resources/add' className='text-blue-400 hover:underline'>
                       Add your first one.
@@ -125,9 +124,6 @@ const DashboardPage = () => {
                       <Badge variant={resource.status === 'published' ? 'green' : 'yellow'}>
                         {resource.status}
                       </Badge>
-                    </td>
-                    <td className='px-6 py-4'>
-                      <span className='text-gray-300 text-sm'>{resource.views || 0}</span>
                     </td>
                     <td className='px-6 py-4'>
                       <div className='flex items-center justify-end gap-2'>
