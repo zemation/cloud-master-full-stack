@@ -1,6 +1,6 @@
 // src/config/config.js
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5500/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5500';
 
 export const navigationMap = {
   "Foundations": [
