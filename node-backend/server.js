@@ -35,8 +35,6 @@ app.use(helmet());
 const allowedOrigins = [
     'https://cloud-master.io',
     'https://www.cloud-master.io',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173'
 ];
 
 const corsOptions = {
