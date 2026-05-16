@@ -19,36 +19,6 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
 };
 
-// @desc    Register a new user
-// @route   POST /api/users/register
-// @access  Public
-const registerUser = async (req, res, next) => {
-  try {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please provide name, email and password'
-      });
-    }
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email already registered'
-      });
-    }
-
-    const user = await User.create({ name, email, password });
-
-    sendTokenResponse(user, 201, res);
-  } catch (err) {
-    next(err);
-  }
-};
-
 // @desc    Login user
 // @route   POST /api/users/login
 // @access  Public
