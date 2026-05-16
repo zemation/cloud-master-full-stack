@@ -41,7 +41,6 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Allow requests with no origin (curl, Postman, server-to-server)
         if (!origin) return callback(null, true);
 
         if (allowedOrigins.includes(origin)) {
@@ -75,21 +74,21 @@ const authLimiter = rateLimit({
     message: { success: false, error: 'Too many auth attempts, please try again later.' }
 });
 
-app.use('/api/', limiter);
-app.use('/api/users', authLimiter);
+app.use('/', limiter);
+app.use('/users', authLimiter);
 
 // Body parsing
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false }));
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Routes
-app.use('/api/resources', resourceRoutes);
-app.use('/api/users', userRoutes);
+app.use('/resources', resourceRoutes);
+app.use('/users', userRoutes);
 
 // 404 handler
 app.use((req, res) => {
