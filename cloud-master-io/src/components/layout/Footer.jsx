@@ -1,6 +1,3 @@
-Footer · JSX
-Copy
-
 // src/components/layout/Footer.jsx
 
 const Footer = () => {
