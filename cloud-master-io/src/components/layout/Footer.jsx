@@ -6,7 +6,7 @@ import { navigationMap } from '../../config/config';
 const Footer = () => {
   return (
     <footer className='bg-gray-900 border-t border-gray-800 mt-auto'>
-      <div className='container mx-auto px-4 max-w-7xl py-12'>
+      <div className='container mx-auto px-4 max-w-7xl py-6'>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-8'>
           {/* Brand */}
           <div className='col-span-2 md:col-span-1'>
