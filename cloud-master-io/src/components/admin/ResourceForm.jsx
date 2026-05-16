@@ -1,6 +1,7 @@
 // src/components/admin/ResourceForm.jsx
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { navigationMap, RESOURCE_TYPES, DIFFICULTY_LEVELS } from '../../config/config';
 import Button from '../ui/Button';
 
@@ -19,6 +20,7 @@ const defaultFormData = {
 };
 
 const ResourceForm = ({ onSubmit, initialData = null, isLoading = false }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(defaultFormData);
 
   useEffect(() => {
@@ -46,7 +48,6 @@ const ResourceForm = ({ onSubmit, initialData = null, isLoading = false }) => {
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
-      // Reset topic when category changes
       ...(name === 'category' && { topic: '' }),
     }));
   };
@@ -228,10 +229,13 @@ const ResourceForm = ({ onSubmit, initialData = null, isLoading = false }) => {
         </div>
       </div>
 
-      {/* Submit */}
+      {/* Submit / Cancel */}
       <div className='flex gap-3 pt-2'>
         <Button type='submit' size='lg' disabled={isLoading}>
           {isLoading ? 'Saving...' : 'Save Resource'}
+        </Button>
+        <Button type='button' variant='secondary' size='lg' onClick={() => navigate('/admin')}>
+          Cancel
         </Button>
       </div>
     </form>

@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createResource, reset } from '../../store/resourceSlice';
 import ResourceForm from '../../components/admin/ResourceForm';
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
 
 const AddResourcePage = () => {
   const navigate = useNavigate();
@@ -34,12 +33,9 @@ const AddResourcePage = () => {
         <span className='text-white'>Add Resource</span>
       </nav>
 
-      <div className='flex items-center justify-between mb-8'>
-        <div>
-          <h1 className='text-3xl font-bold text-white mb-2'>Add Resource</h1>
-          <p className='text-gray-400'>Add a new training resource to the site.</p>
-        </div>
-        <Button variant='secondary' onClick={() => navigate('/admin')}>Cancel</Button>
+      <div className='mb-8'>
+        <h1 className='text-3xl font-bold text-white mb-2'>Add Resource</h1>
+        <p className='text-gray-400'>Add a new training resource to the site.</p>
       </div>
 
       {isError && (
