@@ -11,12 +11,14 @@ const navigationMap = {
         "Hardware Essentials",
         "Introduction to Operating Systems",
         "Networking",
-        "Security"
+        "Security",
+        "Certifications"
     ],
     "Operating Systems": [
         "Linux",
         "Windows",
-        "Mac"
+        "Mac",
+        "Certifications"
     ],
     "DevOps": [
         "Containers",
@@ -31,12 +33,14 @@ const navigationMap = {
         "AWS",
         "GCP",
         "Azure",
-        "OpenStack"
+        "OpenStack",
+        "Certifications"
     ],
     "Web Development": [
         "Frontend",
         "Backend",
-        "Full Stack/Architecture"
+        "Full Stack/Architecture",
+        "Certifications"
     ],
     "Programming": [
         "Python",
