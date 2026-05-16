@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { navigationMap } from '../../config/config';
-
 import logo from '../../assets/logo.png';
 
 const Header = () => {
@@ -22,8 +21,8 @@ const Header = () => {
       <div className='container mx-auto px-4 max-w-7xl'>
         {/* Top bar */}
         <div className='flex items-center justify-between h-16'>
-          <Link to='/' className='text-xl font-bold text-blue-400 hover:text-blue-300 transition-colors'>
-            <img src={logo} alt='Cloud Master' className='h-8 w-auto' />
+          <Link to='/' className='flex items-center gap-2 text-xl font-bold text-blue-400 hover:text-blue-300 transition-colors'>
+            <img src={logo} alt='Cloud Master Logo' className='h-8 w-auto' />
             Cloud Master
           </Link>
 
