@@ -23,7 +23,8 @@ const navigationMap = {
         "Kubernetes",
         "CI/CD",
         "Automation & Scripting",
-        "Observability"
+        "Observability",
+        "Certifications"
     ],
     "Cloud": [
         "Cloud Foundations",
