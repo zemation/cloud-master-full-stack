@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { navigationMap } from '../../config/config';
 
-import logo from '../assets/logo.png';
+import logo from '../../assets/logo.png';
 
 const Header = () => {
   const navigate = useNavigate();
