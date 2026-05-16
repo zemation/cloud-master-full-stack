@@ -25,7 +25,7 @@ const HomePage = () => {
         </h1>
         <p className='text-gray-400 text-lg max-w-2xl mx-auto mb-8'>
           Curated training resources for computer industry topics and certifications.
-          Find courses, study guides, practice exams and more.
+          Find courses, study guides, practice exams and more. Start your learning journey today!
         </p>
         <Link
           to='/resources'
