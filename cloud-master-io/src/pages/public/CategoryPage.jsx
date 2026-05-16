@@ -11,7 +11,7 @@ const topicIcons = {
   'Networking': '🌐',
   'Security': '🔒',
   'Linux': '🐧',
-  'Windows': '🪟',
+  'Windows': '💻',
   'Mac': '🍎',
   'Containers': '📦',
   'Kubernetes': '⎈',
