@@ -121,6 +121,9 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Suppress favicon requests
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // Routes
 app.use('/resources', resourceRoutes);
 app.use('/users', userRoutes);
