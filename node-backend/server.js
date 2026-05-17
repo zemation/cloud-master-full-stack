@@ -92,8 +92,11 @@ const authLimiter = rateLimit({
 app.use('/', limiter);
 app.use('/users', authLimiter);
 
-// Prometheus metrics middleware
+// Prometheus metrics middleware — exclude internal routes
 app.use((req, res, next) => {
+    if (req.path === '/metrics' || req.path === '/health' || req.path === '/favicon.ico') {
+        return next();
+    }
     const end = httpRequestDuration.startTimer();
     res.on('finish', () => {
         const route = req.route ? req.baseUrl + req.route.path : req.path;
