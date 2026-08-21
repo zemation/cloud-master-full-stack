@@ -6,9 +6,9 @@ import Footer from './Footer';
 
 const Layout = () => {
   return (
-    <div className='min-h-screen flex flex-col bg-gray-950 text-gray-100'>
+    <div className='site-shell min-h-screen flex flex-col text-gray-100'>
       <Header />
-      <main className='flex-1 container mx-auto px-4 py-8 max-w-7xl'>
+      <main className='page-content flex-1 w-full'>
         <Outlet />
       </main>
       <Footer />

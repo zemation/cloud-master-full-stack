@@ -1,8 +1,9 @@
 // controllers/resourceController.js
 
-const mongoose = require('mongoose');
 const Resource = require('../models/ResourceModel');
 const { isValidCombination } = require('../config/navigationMap');
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // @desc    Get all published resources (filtering, search, pagination)
 // @route   GET /api/resources
@@ -10,6 +11,10 @@ const { isValidCombination } = require('../config/navigationMap');
 const getResources = async (req, res, next) => {
   try {
     const query = { status: 'published' };
+
+    if (req.query.includeDrafts === 'true' && req.user?.role === 'admin') {
+      delete query.status;
+    }
 
     // Filtering
     if (req.query.category) query.category = req.query.category;
@@ -20,7 +25,7 @@ const getResources = async (req, res, next) => {
 
     // Certification filter
     if (req.query.certification === 'true') {
-      query.certification = { $ne: null, $ne: '' };
+      query.certification = { $nin: [null, ''] };
     } else if (req.query.certification && req.query.certification !== 'true') {
       query.certification = req.query.certification;
     }
@@ -28,8 +33,8 @@ const getResources = async (req, res, next) => {
     // Search
     if (req.query.search) {
       query.$or = [
-        { title: { $regex: req.query.search, $options: 'i' } },
-        { description: { $regex: req.query.search, $options: 'i' } }
+        { title: { $regex: escapeRegex(req.query.search), $options: 'i' } },
+        { description: { $regex: escapeRegex(req.query.search), $options: 'i' } }
       ];
     }
 
@@ -37,8 +42,8 @@ const getResources = async (req, res, next) => {
     const sortBy = req.query.sort === 'views' ? '-views' : '-createdAt';
 
     // Pagination
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
     const skip = (page - 1) * limit;
 
     const [resources, total] = await Promise.all([

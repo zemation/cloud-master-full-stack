@@ -20,16 +20,16 @@ const Header = () => {
   };
 
   return (
-    <header className='bg-gray-900 border-b border-gray-800'>
-      <div className='container mx-auto px-4 max-w-7xl'>
+    <header className='site-header'>
+      <div className='header-inner'>
         {/* Top bar */}
         <div className='flex items-center justify-between h-16'>
-          <Link
-            to='/'
-            className='flex items-center gap-2 text-xl font-bold text-blue-400 hover:text-blue-300 transition-colors'
-          >
-            <img src={logo} alt='Cloud Master Logo' className='h-8 w-auto' />
-            Cloud Master
+          <Link to='/' className='brand'>
+            <img src={logo} alt='Cloud Master Logo' className='brand-mark' />
+            <span>
+              <span className='brand-name block'>Cloud Master</span>
+              <span className='brand-subtitle block'>resource index / 2026</span>
+            </span>
           </Link>
 
           {/* Desktop nav */}
@@ -44,7 +44,7 @@ const Header = () => {
             {user?.user?.role === 'admin' && (
               <Link
                 to='/admin'
-                className='text-gray-300 hover:text-white transition-colors text-sm'
+                className='header-action text-gray-300 hover:text-white transition-colors text-sm px-4 py-2 rounded-lg'
               >
                 Admin
               </Link>
@@ -53,14 +53,14 @@ const Header = () => {
             {user ? (
               <button
                 onClick={handleLogout}
-                className='bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded-lg transition-colors'
+                className='header-action text-sm px-4 py-2 rounded-lg transition-colors'
               >
                 Logout
               </button>
             ) : (
               <Link
                 to='/login'
-                className='bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-lg transition-colors'
+                className='header-action text-sm px-4 py-2 rounded-lg transition-colors'
               >
                 Login
               </Link>
@@ -86,7 +86,7 @@ const Header = () => {
         </div>
 
         {/* Desktop category nav */}
-        <nav className='hidden md:flex gap-6 overflow-x-auto pb-3 scrollbar-hide'>
+        <nav className='category-nav hidden md:flex gap-6 overflow-x-auto py-3 scrollbar-hide'>
           {Object.keys(navigationMap).map((category) => (
             <Link
               key={category}

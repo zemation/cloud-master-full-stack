@@ -1,8 +1,8 @@
 // src/components/ui/Button.jsx
 
 const variants = {
-  primary: 'bg-blue-600 hover:bg-blue-500 text-white',
-  secondary: 'bg-gray-700 hover:bg-gray-600 text-white',
+  primary: 'bg-lime-300 hover:bg-lime-200 text-gray-950',
+  secondary: 'bg-transparent border border-teal-300/50 hover:bg-teal-300/10 text-teal-200',
   danger: 'bg-red-600 hover:bg-red-500 text-white',
   ghost: 'bg-transparent hover:bg-gray-800 text-gray-300 hover:text-white',
 };
@@ -29,7 +29,7 @@ const Button = ({
       disabled={disabled}
       className={`
         inline-flex items-center justify-center gap-2
-        rounded-lg font-medium transition-colors
+        rounded-md font-medium transition-colors
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variants[variant]}
         ${sizes[size]}

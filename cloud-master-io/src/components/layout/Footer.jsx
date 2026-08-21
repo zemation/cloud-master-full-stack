@@ -2,9 +2,9 @@
 
 const Footer = () => {
   return (
-    <footer className='bg-gray-900 border-t border-gray-800 mt-auto'>
-      <div className='container mx-auto px-4 max-w-7xl py-6 text-center'>
-        <p className='text-blue-400 font-bold text-sm'>
+    <footer className='site-footer mt-auto'>
+      <div className='container mx-auto px-4 max-w-7xl py-7 text-center'>
+        <p className='text-teal-300 font-semibold text-sm'>
           A reference guide to training resources for computer industry topics and certifications.
         </p>
         <hr className='border-gray-800 my-4' />

@@ -50,10 +50,19 @@ process.on('uncaughtException', (err) => {
 app.use(helmet());
 
 // CORS
-const allowedOrigins = [
+const defaultOrigins = [
     'https://cloud-master.io',
     'https://www.cloud-master.io',
 ];
+const configuredOrigins = (process.env.CORS_ORIGINS || process.env.CLIENT_URL || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
+
+if (process.env.NODE_ENV !== 'production') {
+    allowedOrigins.push('http://localhost:5173');
+}
 
 const corsOptions = {
     origin: (origin, callback) => {

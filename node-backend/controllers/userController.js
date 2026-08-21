@@ -19,6 +19,24 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
 };
 
+const registerUser = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide a name, email and password'
+      });
+    }
+
+    const user = await User.create({ name, email, password });
+    sendTokenResponse(user, 201, res);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // @desc    Login user
 // @route   POST /api/users/login
 // @access  Public
@@ -180,6 +198,7 @@ const updatePassword = async (req, res, next) => {
 };
 
 module.exports = {
+  registerUser,
   loginUser,
   getMe,
   logoutUser,

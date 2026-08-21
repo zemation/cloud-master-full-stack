@@ -57,6 +57,7 @@ const EditResourcePage = () => {
 
       <Card>
         <ResourceForm
+          key={resource?._id || 'resource-form'}
           onSubmit={handleSubmit}
           initialData={resource}
           isLoading={isLoading}

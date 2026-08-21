@@ -1,6 +1,6 @@
 // src/components/admin/ResourceForm.jsx
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navigationMap, RESOURCE_TYPES, DIFFICULTY_LEVELS } from '../../config/config';
 import Button from '../ui/Button';
@@ -19,27 +19,23 @@ const defaultFormData = {
   status: 'draft',
 };
 
+const getFormData = (initialData) => initialData ? {
+  title: initialData.title || '',
+  url: initialData.url || '',
+  provider: initialData.provider || '',
+  category: initialData.category || '',
+  topic: initialData.topic || '',
+  certification: initialData.certification || '',
+  resourceType: initialData.resourceType || '',
+  description: initialData.description || '',
+  difficulty: initialData.difficulty || 'beginner',
+  isFree: initialData.isFree ?? true,
+  status: initialData.status || 'draft',
+} : defaultFormData;
+
 const ResourceForm = ({ onSubmit, initialData = null, isLoading = false }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState(defaultFormData);
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        title: initialData.title || '',
-        url: initialData.url || '',
-        provider: initialData.provider || '',
-        category: initialData.category || '',
-        topic: initialData.topic || '',
-        certification: initialData.certification || '',
-        resourceType: initialData.resourceType || '',
-        description: initialData.description || '',
-        difficulty: initialData.difficulty || 'beginner',
-        isFree: initialData.isFree ?? true,
-        status: initialData.status || 'draft',
-      });
-    }
-  }, [initialData]);
+  const [formData, setFormData] = useState(() => getFormData(initialData));
 
   const availableTopics = formData.category ? navigationMap[formData.category] || [] : [];
 

@@ -31,7 +31,7 @@ const DashboardPage = () => {
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(getResources({ limit: 100 }));
+    dispatch(getResources({ limit: 100, includeDrafts: 'true' }));
     return () => dispatch(reset());
   }, [dispatch]);
 

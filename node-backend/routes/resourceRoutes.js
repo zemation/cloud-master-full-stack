@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, optionalProtect, authorize } = require('../middleware/authMiddleware');
 
 const {
   getResources,
@@ -25,12 +25,13 @@ router.get('/topic/:topic', getResourcesByTopic);
 
 // --- Collection routes ---
 router.route('/')
-  .get(getResources)
+  .get(optionalProtect, getResources)
   .post(protect, authorize('admin'), createResource);
 
 // --- Single resource routes ---
+router.get('/:id', getResource);
+
 router.route('/:id([0-9a-fA-F]{24})')
-  .get(getResource)
   .put(protect, authorize('admin'), updateResource)
   .delete(protect, authorize('admin'), deleteResource);
 

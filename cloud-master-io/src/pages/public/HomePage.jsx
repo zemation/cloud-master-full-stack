@@ -2,56 +2,57 @@
 
 import { Link } from 'react-router-dom';
 import { navigationMap } from '../../config/config';
-import Card from '../../components/ui/Card';
-
-const categoryIcons = {
-  'Foundations': '🏗️',
-  'Operating Systems': '💻',
-  'DevOps': '⚙️',
-  'Cloud': '☁️',
-  'Web Development': '🌐',
-  'Programming': '👨‍💻',
-  'Databases': '🗄️',
-};
+import Button from '../../components/ui/Button';
+import heroImage from '../../assets/hero.png';
 
 const HomePage = () => {
+  const categories = Object.entries(navigationMap);
+
   return (
-    <div>
-      {/* Hero */}
-      <section className='text-center py-10'>
-        <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-          Your Guide to{' '}
-          <span className='text-blue-400'>Tech Certifications</span>
+    <div className='home-page'>
+      <section className='hero-panel'>
+        <div className='hero-aside' aria-hidden='true'>
+          <img src={heroImage} alt='' />
+        </div>
+        <p className='hero-kicker'>Independent learning, indexed</p>
+        <h1 className='hero-title'>
+          Find the next <em>signal</em> in your tech career.
         </h1>
-        <p className='text-gray-400 text-lg max-w-2xl mx-auto mb-6'>
-          Curated training resources for computer industry topics and certifications.
-          Find courses, study guides, practice exams and more.
+        <p className='hero-copy'>
+          A considered collection of courses, documentation, books, and practice material for the people building what comes next.
         </p>
-        <Link
-          to='/resources'
-          className='inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-medium transition-colors'
-        >
-          Browse All Resources
-        </Link>
+        <div className='hero-actions'>
+          <Link to='/resources'><Button size='lg'>Explore the index <span aria-hidden='true'>↗</span></Button></Link>
+          <Link to='/category/Cloud'><Button variant='secondary' size='lg'>Start with Cloud</Button></Link>
+        </div>
+        <div className='hero-meta'>
+          <div><span className='meta-value'>07</span><span className='meta-label'>domains</span></div>
+          <div><span className='meta-value'>30+</span><span className='meta-label'>topics mapped</span></div>
+          <div><span className='meta-value'>01</span><span className='meta-label'>clean starting point</span></div>
+        </div>
       </section>
 
-      {/* Categories grid */}
       <section>
-        <h2 className='text-xl font-semibold text-white mb-6'>Browse by Category</h2>
-        <div className='flex flex-wrap justify-center gap-4'>
-          {Object.entries(navigationMap).map(([category, topics]) => (
+        <div className='section-heading'>
+          <div>
+            <p className='eyebrow mb-2'>The map</p>
+            <h2>Choose a domain to investigate</h2>
+          </div>
+          <p>CURATED / OPEN / USEFUL</p>
+        </div>
+        <div className='category-grid'>
+          {categories.map(([category, topics], index) => (
             <Link
               key={category}
               to={`/category/${encodeURIComponent(category)}`}
-              className='w-full sm:w-[calc(50%-8px)] lg:w-[calc(25%-12px)]'
+              className='category-tile field-card'
             >
-              <Card className='h-full hover:border-blue-500 transition-colors'>
-                <div className='text-3xl mb-3'>{categoryIcons[category] || '📚'}</div>
-                <h3 className='text-white font-semibold mb-2'>{category}</h3>
-                <p className='text-gray-400 text-sm'>
-                  {topics.join(', ')}
-                </p>
-              </Card>
+              <div>
+                <span className='category-index'>0{index + 1} / DOMAIN</span>
+                <h3>{category}</h3>
+                <p>{topics.length} mapped topics · {topics.slice(0, 2).join(' · ')}</p>
+              </div>
+              <span className='category-arrow' aria-hidden='true'>↗</span>
             </Link>
           ))}
         </div>

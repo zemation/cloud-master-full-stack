@@ -9,16 +9,6 @@ import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
 import Button from '../../components/ui/Button';
 
-const resourceTypeBadgeVariant = {
-  course: 'blue',
-  documentation: 'gray',
-  'practice-exam': 'yellow',
-  'study-guide': 'green',
-  video: 'purple',
-  book: 'gray',
-  tool: 'red',
-};
-
 const ResourcesPage = () => {
   const dispatch = useDispatch();
   const { resources, isLoading, isError, total, pages, page } = useSelector((state) => state.resources);
@@ -30,6 +20,7 @@ const ResourcesPage = () => {
     resourceType: '',
     difficulty: '',
     isFree: '',
+    sort: '',
   });
 
   const [appliedFilters, setAppliedFilters] = useState({});
@@ -55,7 +46,7 @@ const ResourcesPage = () => {
   };
 
   const handleReset = () => {
-    setFilters({ search: '', category: '', topic: '', resourceType: '', difficulty: '', isFree: '' });
+    setFilters({ search: '', category: '', topic: '', resourceType: '', difficulty: '', isFree: '', sort: '' });
     setAppliedFilters({});
   };
 
@@ -65,29 +56,34 @@ const ResourcesPage = () => {
 
   const availableTopics = filters.category ? navigationMap[filters.category] || [] : [];
 
-  const inputClass = 'bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors text-sm';
+  const inputClass = 'resource-input';
+  const activeFilters = Object.entries(appliedFilters).filter(([key, value]) => key !== 'page' && value !== '');
 
   return (
-    <div>
-      <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-white mb-2'>All Resources</h1>
-        <p className='text-gray-400'>
-          {total} resource{total !== 1 ? 's' : ''} available
-        </p>
+    <div className='resource-page'>
+      <div className='resource-heading'>
+        <div>
+          <p className='eyebrow mb-3'>The resource index</p>
+          <h1 className='text-4xl font-semibold text-white mb-2'>All Resources</h1>
+          <p className='text-gray-400'>A working library for your next technical deep dive.</p>
+        </div>
+        <div className='resource-count'><span>{total}</span><small>matching records</small></div>
       </div>
 
-      {/* Filters */}
-      <form onSubmit={handleSearch} className='bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8'>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4'>
+      <form onSubmit={handleSearch} className='resource-controls field-card mb-8'>
+        <div className='resource-search-row'>
           <input
             type='text'
             name='search'
             value={filters.search}
             onChange={handleFilterChange}
-            placeholder='Search resources...'
-            className={`${inputClass} col-span-full`}
+            placeholder='Search by title or description...'
+            className={`${inputClass} resource-search`}
           />
+          <Button type='submit'>Search index <span aria-hidden='true'>↗</span></Button>
+        </div>
 
+        <div className='resource-filter-row'>
           <select name='category' value={filters.category} onChange={handleFilterChange} className={inputClass}>
             <option value=''>All Categories</option>
             {Object.keys(navigationMap).map((cat) => (
@@ -127,17 +123,23 @@ const ResourcesPage = () => {
             <option value='true'>Free Only</option>
             <option value='false'>Paid Only</option>
           </select>
-        </div>
-
-        <div className='flex gap-3'>
-          <Button type='submit'>Search</Button>
+          <select name='sort' value={filters.sort} onChange={handleFilterChange} className={inputClass}>
+            <option value=''>Newest first</option>
+            <option value='views'>Most viewed</option>
+          </select>
           <Button type='button' variant='secondary' onClick={handleReset}>Reset</Button>
         </div>
+        {activeFilters.length > 0 && (
+          <div className='active-filters'>
+            <span className='active-label'>ACTIVE</span>
+            {activeFilters.map(([key, value]) => <span className='filter-chip' key={key}>{key}: {value}</span>)}
+          </div>
+        )}
       </form>
 
       {/* Error */}
       {isError && (
-        <div className='bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg mb-6 text-sm'>
+        <div className='resource-error mb-6'>
           Failed to load resources. Please try again.
         </div>
       )}
@@ -146,12 +148,13 @@ const ResourcesPage = () => {
       {isLoading ? (
         <Spinner className='mt-20' size='lg' />
       ) : resources.length === 0 ? (
-        <Card className='text-center py-12'>
-          <p className='text-gray-400'>No resources found matching your filters.</p>
+        <Card className='empty-state text-center py-12'>
+          <span className='eyebrow'>No match</span>
+          <p className='text-gray-400 mt-3'>No resources found matching your filters.</p>
         </Card>
       ) : (
         <>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <div className='resource-grid'>
             {resources.map((resource) => (
               <a
                 key={resource._id}
@@ -159,30 +162,26 @@ const ResourcesPage = () => {
                 target='_blank'
                 rel='noopener noreferrer'
               >
-                <Card className='h-full hover:border-blue-500 transition-colors'>
-                  <div className='flex items-start justify-between gap-2 mb-3'>
-                    <h3 className='text-white font-semibold text-sm leading-snug'>
-                      {resource.title}
-                    </h3>
+                <Card className='resource-card h-full'>
+                  <div className='resource-card-top'>
+                    <span className='resource-type'>{resource.resourceType}</span>
                     {resource.isFree ? (
-                      <Badge variant='green'>Free</Badge>
+                      <span className='resource-price free'>FREE</span>
                     ) : (
-                      <Badge variant='yellow'>Paid</Badge>
+                      <span className='resource-price'>PAID</span>
                     )}
                   </div>
+                  <h3 className='resource-title'>
+                      {resource.title}
+                  </h3>
 
                   {resource.description && (
-                    <p className='text-gray-400 text-sm mb-4 line-clamp-2'>
+                    <p className='resource-description'>
                       {resource.description}
                     </p>
                   )}
 
-                  <div className='flex flex-wrap gap-2'>
-                    {resource.resourceType && (
-                      <Badge variant={resourceTypeBadgeVariant[resource.resourceType] || 'gray'}>
-                        {resource.resourceType}
-                      </Badge>
-                    )}
+                  <div className='resource-tags'>
                     {resource.difficulty && (
                       <Badge variant='gray'>{resource.difficulty}</Badge>
                     )}
@@ -191,9 +190,9 @@ const ResourcesPage = () => {
                     )}
                   </div>
 
-                  <div className='flex items-center justify-between mt-4'>
-                    <p className='text-gray-500 text-xs'>{resource.provider}</p>
-                    <p className='text-gray-500 text-xs'>{resource.category} / {resource.topic}</p>
+                  <div className='resource-card-footer'>
+                    <div><span className='footer-label'>SOURCE</span><p>{resource.provider}</p></div>
+                    <span className='resource-link' aria-hidden='true'>↗</span>
                   </div>
                 </Card>
               </a>
@@ -202,7 +201,7 @@ const ResourcesPage = () => {
 
           {/* Pagination */}
           {pages > 1 && (
-            <div className='flex justify-center gap-2 mt-8'>
+            <div className='pagination'>
               <Button
                 variant='secondary'
                 disabled={page === 1}
