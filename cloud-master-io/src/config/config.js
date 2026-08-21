@@ -1,6 +1,10 @@
 // src/config/config.js
 
-export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5500').replace(/\/+$/, '');
+const defaultApiUrl = import.meta.env.PROD
+  ? 'https://api.cloud-master.io'
+  : 'http://localhost:5500';
+
+export const API_URL = (import.meta.env.VITE_API_URL || defaultApiUrl).replace(/\/+$/, '');
 
 export const navigationMap = {
   "Foundations": [
