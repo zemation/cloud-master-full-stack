@@ -93,9 +93,13 @@ const resourceSlice = createSlice({
       // Get all resources
       .addCase(getResources.pending, (state) => {
         state.isLoading = true;
+        state.isError = false;
+        state.message = '';
       })
       .addCase(getResources.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isError = false;
+        state.message = '';
         state.resources = action.payload.data;
         state.total = action.payload.total;
         state.pages = action.payload.pages;
