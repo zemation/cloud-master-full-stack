@@ -89,6 +89,7 @@ app.options('*', cors(corsOptions));
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
+    skip: (req) => req.path === '/health',
     message: { success: false, error: 'Too many requests, please try again later.' }
 });
 
