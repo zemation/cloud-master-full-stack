@@ -1,0 +1,89 @@
+name: Frontend CI and deploy
+
+on:
+  pull_request:
+    paths:
+      - cloud-master-io/**
+      - .github/workflows/frontend.yml
+  push:
+    branches:
+      - main
+    paths:
+      - cloud-master-io/**
+      - .github/workflows/frontend.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-production-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloud-master-io
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cloud-master-io/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload frontend build
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: cloud-master-io/dist
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy:
+    name: Deploy frontend
+    if: github.event_name == 'push'
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+
+      - name: Deploy static site
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.FRONTEND_DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.FRONTEND_PATH }}
+        run: >-
+          rsync -az --delete
+          -e "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes"
+          dist/
+          "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"

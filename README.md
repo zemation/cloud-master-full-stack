@@ -12,7 +12,7 @@ A full-stack resource hub for IT, cloud, and DevOps professionals. Browse and di
 **Backend** — Node.js, Express, Mongoose  
 **Database** — MongoDB Atlas  
 **Auth** — JWT  
-**CI/CD** — Jenkins  
+**CI/CD** — GitHub Actions<br>
 **Metrics** — Prometheus (prom-client)
 
 ---
@@ -94,6 +94,24 @@ Foundations · Operating Systems · DevOps · Cloud · Web Development · Progra
 - [ ] User accounts and saved resources
 - [ ] Community contributions and ratings
 - [ ] Search functionality
+
+---
+
+## CI/CD
+
+The frontend and backend have separate workflows. Pull requests run checks only for the application changed. A push to `main` runs the relevant checks and deploys only the changed application to production.
+
+Add these encrypted repository secrets under **Settings → Secrets and variables → Actions** before enabling production deployments:
+
+- `DEPLOY_SSH_KEY` — the private key whose public key is authorized for both deployment users
+- `DEPLOY_SSH_KNOWN_HOSTS` — the verified `known_hosts` entry for `server.zemation.com` (for example, generated from a trusted machine with `ssh-keyscan server.zemation.com` and verified against the server's host-key fingerprint)
+- `DEPLOY_HOST` — the SSH host, currently `server.zemation.com`
+- `FRONTEND_DEPLOY_USER` — the frontend SSH user, currently `cloud-master`
+- `FRONTEND_PATH` — the frontend deployment directory, currently `/home/cloud-master/htdocs/www.cloud-master.io`
+- `BACKEND_DEPLOY_USER` — the backend SSH user, currently `cloud-master-api`
+- `BACKEND_PATH` — the backend deployment directory, currently `/home/cloud-master-api/htdocs/api.cloud-master.io`
+
+The production `.env` files stay on the server and are excluded from deployment.
 
 ---
 
