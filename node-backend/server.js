@@ -11,6 +11,7 @@ const client = require('prom-client');
 const { errorHandler } = require('./middleware/errorHandler');
 const resourceRoutes = require('./routes/resourceRoutes');
 const userRoutes = require('./routes/userRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 // Prometheus metrics setup
 const collectDefaultMetrics = client.collectDefaultMetrics;
@@ -137,6 +138,7 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 // Routes
 app.use('/resources', resourceRoutes);
 app.use('/users', userRoutes);
+app.use('/chat', chatRoutes);
 
 // 404 handler
 app.use((req, res) => {

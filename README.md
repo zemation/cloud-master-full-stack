@@ -51,6 +51,18 @@ NODE_ENV=development
 CLIENT_URL=http://localhost:5173
 ```
 
+Optional — AI study-guide chat (`POST /chat`, any OpenAI-compatible API):
+
+```env
+CHAT_API_BASE_URL=https://your-model-provider.example/v1
+CHAT_API_KEY=[SECURITY_DATA]
+CHAT_MODEL=your-model-id
+CHAT_RATE_MAX=30
+```
+
+If the `CHAT_*` variables are not set, `POST /chat` returns `503` and the
+chat widget shows a "not available" notice.
+
 ```bash
 npm run dev
 ```
@@ -81,6 +93,7 @@ npm run dev
 - Filter by difficulty (beginner, intermediate, advanced)
 - Admin dashboard for adding, editing, and removing resources
 - JWT-based authentication for admin access
+- AI study-guide chat widget, grounded in the site's own curated resources
 
 ## Categories
 
