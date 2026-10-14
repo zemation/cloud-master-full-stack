@@ -2,6 +2,8 @@
 
 const { buildSystemPrompt } = require('../prompts/chatSystemPrompt');
 const { findRelevantResources, listCertifications } = require('../utils/chatGrounding');
+const { checkBudget, recordUsage } = require('../utils/chatBudget');
+const { verifyTurnstile } = require('../utils/turnstile');
 
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_ITEMS = 20;
@@ -58,6 +60,27 @@ const streamChat = async (req, res, next) => {
     const userMessage = message.trim();
     const cleanHistory = sanitizeHistory(history);
 
+    // Bot check first: fail fast before spending anything (Mongo queries,
+    // let alone model tokens) on automated traffic.
+    const human = await verifyTurnstile(req.body?.turnstileToken, req.ip);
+    if (!human) {
+      return res.status(403).json({
+        success: false,
+        error: 'Verification failed. Please try again.',
+      });
+    }
+
+    // Hard daily spend ceiling: refuse new chats once today's token
+    // budget is exhausted.
+    const budget = await checkBudget();
+    if (!budget.allowed) {
+      return res.status(429).json({
+        success: false,
+        code: 'BUDGET_EXCEEDED',
+        error: 'Chat is paused for today — please come back tomorrow.',
+      });
+    }
+
     // Ground the answer in the site's own data
     const [certifications, resources] = await Promise.all([
       listCertifications(),
@@ -79,6 +102,9 @@ const streamChat = async (req, res, next) => {
         stream: true,
         temperature: 0.7,
         max_tokens: MAX_TOKENS,
+        // Ask for token counts in the final chunk so the daily budget
+        // can be enforced. Providers that don't support this ignore it.
+        stream_options: { include_usage: true },
         messages: [
           { role: 'system', content: systemPrompt },
           ...cleanHistory,
@@ -113,17 +139,50 @@ const streamChat = async (req, res, next) => {
 
     const reader = upstream.body.getReader();
     const decoder = new TextDecoder();
+    let buffer = '';
+    let usage = null;
+
+    // The final SSE chunk may carry { usage: { prompt_tokens, completion_tokens } }.
+    const captureUsage = (payload) => {
+      if (!payload || payload === '[DONE]') return;
+      try {
+        const json = JSON.parse(payload);
+        if (json && json.usage) usage = json.usage;
+      } catch {
+        // Not JSON — ignore.
+      }
+    };
 
     try {
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
-        res.write(decoder.decode(value, { stream: true }));
+        const text = decoder.decode(value, { stream: true });
+        res.write(text);
+        buffer += text;
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+        for (const event of events) {
+          for (const line of event.split('\n')) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data:')) {
+              captureUsage(trimmed.slice(5).trim());
+            }
+          }
+        }
       }
       res.write('data: [DONE]\n\n');
     } finally {
       reader.releaseLock();
       req.off('close', abortUpstream);
+    }
+
+    // Record token usage for the daily budget (best effort — never fail
+    // an otherwise successful chat over accounting).
+    try {
+      await recordUsage(usage?.prompt_tokens, usage?.completion_tokens);
+    } catch (err) {
+      console.error(`Chat usage recording failed: ${err.message}`);
     }
 
     res.end();

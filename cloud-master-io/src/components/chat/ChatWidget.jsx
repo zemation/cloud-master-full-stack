@@ -3,6 +3,30 @@
 import { useEffect, useRef, useState } from 'react';
 import { streamChatMessage } from '../../api/chatApi';
 
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
+const TURNSTILE_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+
+// Load Cloudflare's Turnstile script once. Resolves immediately when the
+// site key isn't configured (bot check disabled).
+const loadTurnstile = () => {
+  if (!TURNSTILE_SITE_KEY) return Promise.resolve(false);
+  if (window.turnstile) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const existing = document.querySelector(`script[src="${TURNSTILE_SCRIPT}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => resolve(true), { once: true });
+      existing.addEventListener('error', () => resolve(false), { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = TURNSTILE_SCRIPT;
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.head.appendChild(script);
+  });
+};
+
 const GREETING = {
   role: 'assistant',
   content:
@@ -20,6 +44,72 @@ const ChatWidget = () => {
   const [error, setError] = useState(null);
   const abortRef = useRef(null);
   const scrollRef = useRef(null);
+  const turnstileBoxRef = useRef(null);
+  const turnstileWidgetId = useRef(null);
+  const turnstileResolveRef = useRef(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, open]);
+
+  // Render the invisible Turnstile widget once the panel opens. When no
+  // site key is configured the bot check stays disabled.
+  useEffect(() => {
+    if (!open || !TURNSTILE_SITE_KEY || turnstileWidgetId.current !== null) return;
+    let cancelled = false;
+    loadTurnstile().then((ready) => {
+      if (cancelled || !ready || !turnstileBoxRef.current || !window.turnstile) return;
+      turnstileWidgetId.current = window.turnstile.render(turnstileBoxRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        size: 'invisible',
+        callback: (token) => {
+          const resolve = turnstileResolveRef.current;
+          turnstileResolveRef.current = null;
+          if (resolve) resolve(token);
+        },
+        'expired-callback': () => {
+          turnstileResolveRef.current = null;
+        },
+        'error-callback': () => {
+          const resolve = turnstileResolveRef.current;
+          turnstileResolveRef.current = null;
+          if (resolve) resolve(null);
+        },
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open ]);
+
+  // Get a fresh bot-check token before sending. Resolves null when the
+  // check is disabled or unavailable (backend skips verification then).
+  const getTurnstileToken = () => {
+    if (!TURNSTILE_SITE_KEY || !window.turnstile || turnstileWidgetId.current === null) {
+      return Promise.resolve(null);
+    }
+    return new Promise((resolve) => {
+      turnstileResolveRef.current = resolve;
+      window.turnstile.execute(turnstileWidgetId.current);
+      setTimeout(() => {
+        if (turnstileResolveRef.current) {
+          turnstileResolveRef.current = null;
+          resolve(null);
+        }
+      }, 10000);
+    });
+  };
+
+  const resetTurnstile = () => {
+    if (window.turnstile && turnstileWidgetId.current !== null) {
+      try {
+        window.turnstile.reset(turnstileWidgetId.current);
+      } catch {
+        // Ignore reset failures; the next execute still works.
+      }
+    }
+  };
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -53,8 +143,12 @@ const ChatWidget = () => {
     abortRef.current = controller;
 
     try {
+      // Invisible bot check (skipped when not configured).
+      const turnstileToken = await getTurnstileToken();
+      if (controller.signal.aborted) return;
+
       await streamChatMessage(
-        { message: text, history },
+        { message: text, history, turnstileToken },
         {
           signal: controller.signal,
           onToken: (token) => {
@@ -83,6 +177,7 @@ const ChatWidget = () => {
     } finally {
       setStreaming(false);
       abortRef.current = null;
+      resetTurnstile();
     }
   };
 
@@ -116,6 +211,8 @@ const ChatWidget = () => {
           </div>
 
           <div ref={scrollRef} className='flex-1 space-y-3 overflow-y-auto px-4 py-3'>
+            {/* Invisible Cloudflare Turnstile mount point (bot check) */}
+            <div ref={turnstileBoxRef} aria-hidden='true' className='hidden' />
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
