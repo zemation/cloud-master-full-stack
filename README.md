@@ -58,10 +58,35 @@ CHAT_API_BASE_URL=https://your-model-provider.example/v1
 CHAT_API_KEY=[SECURITY_DATA]
 CHAT_MODEL=your-model-id
 CHAT_RATE_MAX=30
+# Hard daily ceiling on model tokens (prompt + completion, UTC day).
+# The endpoint returns 429 once exceeded. 0 = unlimited (not recommended).
+CHAT_DAILY_TOKEN_BUDGET=100000
+# Cloudflare Turnstile bot check (free at dash.cloudflare.com → Turnstile).
+# When set, the widget must pass the invisible check before each message.
+TURNSTILE_SECRET_KEY=[SECURITY_DATA]
+```
+
+Frontend (optional, pairs with the backend key above):
+
+```env
+VITE_TURNSTILE_SITE_KEY=your_turnstile_site_key
 ```
 
 If the `CHAT_*` variables are not set, `POST /chat` returns `503` and the
 chat widget shows a "not available" notice.
+
+### Chat abuse protection
+
+Because every message spends model tokens, `/chat` is guarded in layers:
+
+1. **Per-IP rate limit** (`CHAT_RATE_MAX` per 15 minutes).
+2. **Cloudflare Turnstile** — invisible bot check in the widget; unverified
+   requests are rejected with 403. Skipped entirely when the Turnstile keys
+   aren't configured (handy for local dev).
+3. **Daily token budget** (`CHAT_DAILY_TOKEN_BUDGET`) — upstream token usage
+   is counted per UTC day in the `chatusages` collection; once the budget is
+   hit, the endpoint returns 429 until the next day. This is the financial
+   kill-switch: worst case, one day's budget is the most abuse can cost.
 
 ```bash
 npm run dev

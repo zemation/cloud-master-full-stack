@@ -29,6 +29,7 @@ const extractToken = (payload) => {
  * @param {Object} args
  * @param {string} args.message - the visitor's message
  * @param {Array<{role: string, content: string}>} [args.history] - prior turns
+ * @param {string} [args.turnstileToken] - Cloudflare Turnstile token (bot check)
  * @param {Object} callbacks
  * @param {(token: string) => void} callbacks.onToken - called per streamed token
  * @param {AbortSignal} [callbacks.signal] - to cancel the stream
@@ -36,13 +37,13 @@ const extractToken = (payload) => {
  * @throws {Error} with the server's message on failure
  */
 export const streamChatMessage = async (
-  { message, history = [] },
+  { message, history = [], turnstileToken = null },
   { onToken, signal }
 ) => {
   const response = await fetch(CHAT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify({ message, history, turnstileToken }),
     signal,
   });
 
