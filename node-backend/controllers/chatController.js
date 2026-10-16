@@ -29,8 +29,9 @@ const chatConfig = () => ({
 });
 
 const isConfigured = () => {
-  const { baseUrl, apiKey, model } = chatConfig();
-  return Boolean(baseUrl && apiKey && model);
+  const { baseUrl, model } = chatConfig();
+  // apiKey is optional: self-hosted providers (e.g. Ollama) don't need one.
+  return Boolean(baseUrl && model);
 };
 
 // @desc    Stream a study-guide chat completion (SSE)
@@ -95,7 +96,8 @@ const streamChat = async (req, res, next) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        // Only sent when configured (self-hosted models don't need it).
+        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       },
       body: JSON.stringify({
         model,

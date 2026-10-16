@@ -55,6 +55,8 @@ Optional — AI study-guide chat (`POST /chat`, any OpenAI-compatible API):
 
 ```env
 CHAT_API_BASE_URL=https://your-model-provider.example/v1
+# Optional — only needed if your provider requires authentication
+# (self-hosted models like Ollama don't).
 CHAT_API_KEY=[SECURITY_DATA]
 CHAT_MODEL=your-model-id
 CHAT_RATE_MAX=30
@@ -72,8 +74,9 @@ Frontend (optional, pairs with the backend key above):
 VITE_TURNSTILE_SITE_KEY=your_turnstile_site_key
 ```
 
-If the `CHAT_*` variables are not set, `POST /chat` returns `503` and the
-chat widget shows a "not available" notice.
+If `CHAT_API_BASE_URL` or `CHAT_MODEL` are not set, `POST /chat` returns
+`503` and the chat widget shows a "not available" notice. `CHAT_API_KEY`
+is optional and only sent when set.
 
 ### Chat abuse protection
 
