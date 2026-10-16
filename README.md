@@ -91,6 +91,16 @@ Because every message spends model tokens, `/chat` is guarded in layers:
    hit, the endpoint returns 429 until the next day. This is the financial
    kill-switch: worst case, one day's budget is the most abuse can cost.
 
+### Chat scope guard
+
+The widget is a certification study guide, not a general chatbot. Before the
+main model call, a tiny classifier prompt (`utils/chatScope.js`) labels the
+message `IN_SCOPE` (certs, exam prep, cloud/IT learning) or `OFF_TOPIC`.
+Off-topic messages get a canned redirect streamed back — no model call is
+spent on them. The classifier fails open: if it errors or is unsure, the
+message goes through to the normal grounded chat, and the system prompt's
+scope rule acts as a backstop.
+
 ```bash
 npm run dev
 ```
