@@ -4,6 +4,7 @@ const { buildSystemPrompt } = require('../prompts/chatSystemPrompt');
 const { findRelevantResources, listCertifications } = require('../utils/chatGrounding');
 const { checkBudget, recordUsage } = require('../utils/chatBudget');
 const { verifyTurnstile } = require('../utils/turnstile');
+const { classifyScope, OFF_TOPIC_REDIRECT } = require('../utils/chatScope');
 
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_ITEMS = 20;
@@ -82,6 +83,26 @@ const streamChat = async (req, res, next) => {
       });
     }
 
+    const { baseUrl, apiKey, model } = chatConfig();
+
+    // Scope guard: keep the widget on certification topics. Off-topic
+    // questions get a canned redirect streamed back (the frontend already
+    // handles SSE), so no model call is spent on them.
+    const inScope = await classifyScope(userMessage, { baseUrl, apiKey, model });
+    if (!inScope) {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      });
+      res.write(
+        `data: ${JSON.stringify({ choices: [{ delta: { content: OFF_TOPIC_REDIRECT } }] })}\n\n`
+      );
+      res.write('data: [DONE]\n\n');
+      return res.end();
+    }
+
     // Ground the answer in the site's own data
     const [certifications, resources] = await Promise.all([
       listCertifications(),
@@ -89,8 +110,6 @@ const streamChat = async (req, res, next) => {
     ]);
 
     const systemPrompt = buildSystemPrompt({ certifications, resources });
-
-    const { baseUrl, apiKey, model } = chatConfig();
 
     const upstream = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
